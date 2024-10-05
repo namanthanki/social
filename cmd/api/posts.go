@@ -28,11 +28,6 @@ func (app *application) createPostHandler(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	if payload.Content == "" {
-		app.badRequestError(w, r, errors.New("missing required fields"))
-		return
-	}
-
 	post := &store.Post{
 		UserID:  3,
 		Title:   payload.Title,
