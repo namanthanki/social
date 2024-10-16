@@ -2,6 +2,7 @@ package main
 
 import (
 	"errors"
+	"log"
 	"net/http"
 	"strconv"
 
@@ -70,6 +71,16 @@ func (app *application) getPostHandler(w http.ResponseWriter, r *http.Request) {
 		}
 		return
 	}
+
+	comments, err := app.store.Comments.GetByPostID(ctx, id)
+	if err != nil {
+		log.Printf("Error: %v", err)
+
+		app.internalServerError(w, r, err)
+		return
+	}
+
+	post.Comments = comments
 
 	if err := app.jsonResponse(w, http.StatusOK, post); err != nil {
 		app.internalServerError(w, r, err)
