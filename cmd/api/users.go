@@ -10,6 +10,10 @@ import (
 	"github.com/namanthanki/social/internal/store"
 )
 
+type FollowUser struct {
+	UserID int64 `json:"user_id"`
+}
+
 type userKey string
 
 const userKeyContext userKey = "user"
@@ -21,6 +25,51 @@ func (app *application) getUserHandler(w http.ResponseWriter, r *http.Request) {
 		app.internalServerError(w, r, err)
 		return
 	}
+}
+
+func (app *application) followUserHandler(w http.ResponseWriter, r *http.Request) {
+	follower := getUserFromContext(r)
+
+	var payload FollowUser
+	if err := readJSON(w, r, &payload); err != nil {
+		app.badRequestError(w, r, err)
+		return
+	}
+
+	ctx := r.Context()
+
+	if err := app.store.Followers.Follow(ctx, follower.ID, payload.UserID); err != nil {
+		switch err {
+		case store.ErrConflict:
+			app.conflictResponse(w, r, err)
+			return
+		default:
+			app.internalServerError(w, r, err)
+		}
+
+		return
+	}
+
+	w.WriteHeader(http.StatusNoContent)
+}
+
+func (app *application) unfollowUserHandler(w http.ResponseWriter, r *http.Request) {
+	unfollowed := getUserFromContext(r)
+
+	var payload FollowUser
+	if err := readJSON(w, r, &payload); err != nil {
+		app.badRequestError(w, r, err)
+		return
+	}
+
+	ctx := r.Context()
+
+	if err := app.store.Followers.Unfollow(ctx, unfollowed.ID, payload.UserID); err != nil {
+		app.internalServerError(w, r, err)
+		return
+	}
+
+	w.WriteHeader(http.StatusNoContent)
 }
 
 func (app *application) usersContextMiddleware(next http.Handler) http.Handler {
