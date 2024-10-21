@@ -10,6 +10,23 @@ import (
 
 const version = "0.0.1"
 
+//	@title			social
+//	@description	social media API for golang practice.
+
+//	@contact.name	API Support
+//	@contact.url	http://www.swagger.io/support
+//	@contact.email	support@swagger.io
+
+//	@license.name	Apache 2.0
+//	@license.url	http://www.apache.org/licenses/LICENSE-2.0.html
+
+//	@BasePath	v1
+
+//	@securityDefinitions.apiKey	ApiKeyAuth
+//	@in							header
+//	@name						Authorization
+//	@description
+
 func main() {
 	logger := zap.Must(zap.NewProduction()).Sugar()
 	defer logger.Sync()
@@ -21,7 +38,8 @@ func main() {
 	}
 
 	cfg := config{
-		address: env.GetString(("API_ADDRESS"), ":1337"),
+		address: env.GetString("API_ADDRESS", ":1337"),
+		apiURL:  env.GetString("EXTERNAL_URL", "localhost:1337"),
 		db: dbConfig{
 			address:      env.GetString("DB_ADDRESS", "postgresql://postgres:password@localhost:5432/social?sslmode=disable"),
 			maxOpenConns: env.GetInt("DB_MAX_OPEN_CONNS", 5),
